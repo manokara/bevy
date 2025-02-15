@@ -70,7 +70,7 @@ edge_executor = ["dep:bevy_tasks", "bevy_tasks/edge_executor"]
 ## supported platforms.
 std = [
   "bevy_reflect?/std",
-  "bevy_tasks/std",
+  "bevy_tasks?/std",
   "bevy_utils/std",
   "bitflags/std",
   "concurrent-queue/std",

@@ -1,4 +1,4 @@
-#[cfg(feature = "std")]
+#[cfg(all(feature = "std", feature = "multi_threaded"))]
 mod multi_threaded;
 mod simple;
 mod single_threaded;
@@ -8,7 +8,7 @@ use core::any::TypeId;
 
 pub use self::{simple::SimpleExecutor, single_threaded::SingleThreadedExecutor};
 
-#[cfg(feature = "std")]
+#[cfg(all(feature = "std", feature = "multi_threaded"))]
 pub use self::multi_threaded::{MainThreadExecutor, MultiThreadedExecutor};
 
 use fixedbitset::FixedBitSet;
@@ -55,8 +55,8 @@ pub enum ExecutorKind {
     /// immediately after running each system.
     Simple,
     /// Runs the schedule using a thread pool. Non-conflicting systems can run in parallel.
-    #[cfg(feature = "std")]
-    #[cfg_attr(all(not(target_arch = "wasm32"), feature = "multi_threaded"), default)]
+    #[cfg(all(feature = "std", feature = "multi_threaded"))]
+    #[cfg_attr(not(target_arch = "wasm32"), default)]
     MultiThreaded,
 }
 
@@ -76,15 +76,15 @@ pub struct SystemSchedule {
     /// Indexed by system node id.
     /// Number of systems that the system immediately depends on.
     #[cfg_attr(
-        not(feature = "std"),
-        expect(dead_code, reason = "currently only used with the std feature")
+        not(all(feature = "std", feature = "multi_threaded")),
+        expect(dead_code, reason = "currently only used with the std + multi_threaded features")
     )]
     pub(super) system_dependencies: Vec<usize>,
     /// Indexed by system node id.
     /// List of systems that immediately depend on the system.
     #[cfg_attr(
-        not(feature = "std"),
-        expect(dead_code, reason = "currently only used with the std feature")
+        not(all(feature = "std", feature = "multi_threaded")),
+        expect(dead_code, reason = "currently only used with the std + multi_threaded features")
     )]
     pub(super) system_dependents: Vec<Vec<usize>>,
     /// Indexed by system node id.
@@ -282,8 +282,8 @@ mod __rust_begin_short_backtrace {
     /// # Safety
     /// See `ReadOnlySystem::run_unsafe`.
     #[cfg_attr(
-        not(feature = "std"),
-        expect(dead_code, reason = "currently only used with the std feature")
+        not(all(feature = "std", feature = "multi_threaded")),
+        expect(dead_code, reason = "currently only used with the std + multi_threaded features")
     )]
     #[inline(never)]
     pub(super) unsafe fn readonly_run_unsafe<O: 'static>(
@@ -324,10 +324,17 @@ mod tests {
     #[derive(Resource)]
     struct R2;
 
+    #[cfg(feature = "multi_threaded")]
     const EXECUTORS: [ExecutorKind; 3] = [
         ExecutorKind::Simple,
         ExecutorKind::SingleThreaded,
         ExecutorKind::MultiThreaded,
+    ];
+
+    #[cfg(not(feature = "multi_threaded"))]
+    const EXECUTORS: [ExecutorKind; 2] = [
+        ExecutorKind::Simple,
+        ExecutorKind::SingleThreaded,
     ];
 
     #[test]

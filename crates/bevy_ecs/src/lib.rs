@@ -155,13 +155,18 @@ mod tests {
     };
     use bevy_ecs_macros::{VisitEntities, VisitEntitiesMut};
     use bevy_platform_support::collections::HashSet;
+
+    #[cfg(feature = "multi_threaded")]
     use bevy_tasks::{ComputeTaskPool, TaskPool};
+
     use core::{
         any::TypeId,
         marker::PhantomData,
         num::NonZero,
         sync::atomic::{AtomicUsize, Ordering},
     };
+
+    #[cfg(feature = "multi_threaded")]
     use std::sync::Mutex;
 
     #[derive(Component, Resource, Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -476,6 +481,7 @@ mod tests {
         assert!(results.contains(&(f, A(456))));
     }
 
+    #[cfg(feature = "multi_threaded")]
     #[test]
     fn par_for_each_dense() {
         ComputeTaskPool::get_or_init(TaskPool::default);
@@ -499,6 +505,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "multi_threaded")]
     #[test]
     fn par_for_each_sparse() {
         ComputeTaskPool::get_or_init(TaskPool::default);

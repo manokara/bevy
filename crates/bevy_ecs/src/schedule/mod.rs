@@ -104,7 +104,7 @@ mod tests {
         }
 
         #[test]
-        #[cfg(not(miri))]
+        #[cfg(all(not(miri), feature = "multi_threaded"))]
         fn parallel_execution() {
             use alloc::sync::Arc;
             use bevy_tasks::{ComputeTaskPool, TaskPool};
